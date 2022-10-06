@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="ASCII"?>						
+
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" >						
+
+	<xsl:output method="xml" indent="no" ></xsl:output>
+
+	<xsl:param name="ifId" ></xsl:param>
+
+ 	<xsl:param name="ifVer" ></xsl:param>
+
+  	<xsl:param name="ifSenderGrp" ></xsl:param>
+
+    	<xsl:param name="ifSender" ></xsl:param>
+
+    	<xsl:param name="ifReceiverGrp" ></xsl:param>
+
+    	<xsl:param name="ifReceiver" ></xsl:param>
+
+    	<xsl:param name="ifTrackingId" ></xsl:param> 
+
+	<xsl:param name="ifDateTime" ></xsl:param>
+
+	<xsl:template match="/">
+
+		<request>			
+
+			<header>
+
+				<ifId><xsl:value-of select="$ifId"></xsl:value-of></ifId>
+
+				<ifVer><xsl:value-of select="$ifVer"></xsl:value-of></ifVer>
+
+				<ifSenderGrp><xsl:value-of select="$ifSenderGrp"></xsl:value-of></ifSenderGrp>					
+
+				<ifSender><xsl:value-of select="$ifSender"></xsl:value-of></ifSender>
+
+				<ifReceiverGrp><xsl:value-of select="$ifReceiverGrp"></xsl:value-of></ifReceiverGrp>
+
+				<ifReceiver><xsl:value-of select="$ifReceiver"></xsl:value-of></ifReceiver>
+
+				<ifTrackingId><xsl:value-of select="$ifTrackingId"></xsl:value-of></ifTrackingId>
+
+				<ifDateTime><xsl:value-of select="$ifDateTime"></xsl:value-of></ifDateTime>
+
+			</header>
+
+			<payload>
+
+				<resultsCount><xsl:value-of select="count(payload/results)"></xsl:value-of></resultsCount>
+
+			<xsl:for-each select="payload/results">
+
+				<results>			
+
+					<S_TARGET_DT><xsl:value-of select="S_TARGET_DT"></xsl:value-of></S_TARGET_DT>
+
+					<S_SRVC_AREA_CD><xsl:value-of select="S_SRVC_AREA_CD"></xsl:value-of></S_SRVC_AREA_CD>
+
+					<S_SRVC_AREA_NM><xsl:value-of select="S_SRVC_AREA_NM"></xsl:value-of></S_SRVC_AREA_NM>
+
+					<I_USER_JOIN_CNT><xsl:value-of select="I_USER_JOIN_CNT"></xsl:value-of></I_USER_JOIN_CNT>
+
+					<I_BOARD_CNT><xsl:value-of select="I_BOARD_CNT"></xsl:value-of></I_BOARD_CNT>
+
+					<I_BOARD_CNL_CNT><xsl:value-of select="I_BOARD_CNL_CNT"></xsl:value-of></I_BOARD_CNL_CNT>
+
+					<I_FAIL_CNT><xsl:value-of select="I_FAIL_CNT"></xsl:value-of></I_FAIL_CNT>
+
+					<I_TOT_BOARD_PSN_CNT><xsl:value-of select="I_TOT_BOARD_PSN_CNT"></xsl:value-of></I_TOT_BOARD_PSN_CNT>
+
+					<I_RUN_TIME><xsl:value-of select="I_RUN_TIME"></xsl:value-of></I_RUN_TIME>
+
+					<I_RUN_DIST><xsl:value-of select="I_RUN_DIST"></xsl:value-of></I_RUN_DIST>
+
+					<I_SUM_USER_JOIN_CNT><xsl:value-of select="I_SUM_USER_JOIN_CNT"></xsl:value-of></I_SUM_USER_JOIN_CNT>
+
+					<I_SUM_BOARD_CNT><xsl:value-of select="I_SUM_BOARD_CNT"></xsl:value-of></I_SUM_BOARD_CNT>
+
+					<I_SUM_BOARD_CNL_CNT><xsl:value-of select="I_SUM_BOARD_CNL_CNT"></xsl:value-of></I_SUM_BOARD_CNL_CNT>
+
+					<I_SUM_FAIL_CNT><xsl:value-of select="I_SUM_FAIL_CNT"></xsl:value-of></I_SUM_FAIL_CNT>
+
+					<I_SUM_TOT_BOARD_PSN_CNT><xsl:value-of select="I_SUM_TOT_BOARD_PSN_CNT"></xsl:value-of></I_SUM_TOT_BOARD_PSN_CNT>
+
+					<I_SUM_RUN_TIME><xsl:value-of select="I_SUM_RUN_TIME"></xsl:value-of></I_SUM_RUN_TIME>
+
+					<I_SUM_RUN_DIST><xsl:value-of select="I_SUM_RUN_DIST"></xsl:value-of></I_SUM_RUN_DIST>
+
+					<D_SEND_DT><xsl:value-of select="$ifDateTime"></xsl:value-of></D_SEND_DT>
+
+				</results>
+
+			</xsl:for-each>
+
+			</payload>
+
+		</request>
+
+	</xsl:template>				
+
+</xsl:stylesheet>
+
+
+
+
+
+
+
+
+
+
+
+<?xml version="1.0" encoding="ASCII"?>						
+
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" >						
+
+	<xsl:output method="xml" indent="no" ></xsl:output>
+
+	<xsl:param name="ifId" ></xsl:param>
+
+    	<xsl:param name="ifVer" ></xsl:param>	    	
+
+	<xsl:param name="ifSenderGrp" ></xsl:param>
+
+	<xsl:param name="ifSender" ></xsl:param>
+
+	<xsl:param name="ifReceiverGrp" ></xsl:param>
+
+	<xsl:param name="ifReceiver" ></xsl:param>
+
+	<xsl:param name="ifTrackingId" ></xsl:param> 
+
+	<xsl:param name="ifDateTime" ></xsl:param>
+
+	<xsl:param name="ifResult" ></xsl:param>
+
+	<xsl:param name="ifFailMsg" ></xsl:param>
+
+	<xsl:template match="/">
+
+		<response>			
+
+			<header>
+
+				<ifId><xsl:value-of select="$ifId"></xsl:value-of></ifId>
+
+				<ifVer><xsl:value-of select="$ifVer"></xsl:value-of></ifVer>
+
+				<ifSenderGrp><xsl:value-of select="$ifSenderGrp"></xsl:value-of></ifSenderGrp>					
+
+				<ifSender><xsl:value-of select="$ifSender"></xsl:value-of></ifSender>
+
+				<ifReceiverGrp><xsl:value-of select="$ifReceiverGrp"></xsl:value-of></ifReceiverGrp>
+
+				<ifReceiver><xsl:value-of select="$ifReceiver"></xsl:value-of></ifReceiver>
+
+				<ifTrackingId><xsl:value-of select="$ifTrackingId"></xsl:value-of></ifTrackingId>
+
+				<ifDateTime><xsl:value-of select="$ifDateTime"></xsl:value-of></ifDateTime>
+
+				<ifResult><xsl:value-of select="$ifResult"></xsl:value-of></ifResult>
+
+				<ifFailMsg><xsl:value-of select="$ifFailMsg"></xsl:value-of></ifFailMsg>
+
+			</header>
+
+			<payload>
+
+			<xsl:for-each select="request/payload/results">
+
+				<results>			
+
+					<S_TARGET_DT><xsl:value-of select="S_TARGET_DT"></xsl:value-of></S_TARGET_DT>
+
+					<S_SRVC_AREA_CD><xsl:value-of select="S_SRVC_AREA_CD"></xsl:value-of></S_SRVC_AREA_CD>
+
+					<S_IF_SEND_YN>
+
+						<xsl:choose>
+
+							<xsl:when test="$ifResult='OK'">Y</xsl:when>						
+
+							<xsl:otherwise>E</xsl:otherwise>						
+
+						</xsl:choose>	
+
+					</S_IF_SEND_YN>
+
+				</results>
+
+			</xsl:for-each>	
+
+			</payload>
+
+		</response>
+
+	</xsl:template>				
+
+</xsl:stylesheet>
+
+
+
+<?xml version="1.0" encoding="ASCII"?>						
+
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" >						
+
+	<xsl:output method="xml" indent="no" ></xsl:output>
+
+	<xsl:template match="/">
+
+			<xsl:for-each select="request/payload/results">
+
+				<GROUP>			
+
+					<S_TARGET_DT><xsl:value-of select="S_TARGET_DT"></xsl:value-of></S_TARGET_DT>
+
+					<S_SRVC_AREA_CD><xsl:value-of select="S_SRVC_AREA_CD"></xsl:value-of></S_SRVC_AREA_CD>
+
+					<S_SRVC_AREA_NM><xsl:value-of select="S_SRVC_AREA_NM"></xsl:value-of></S_SRVC_AREA_NM>
+
+					<I_USER_JOIN_CNT><xsl:value-of select="I_USER_JOIN_CNT"></xsl:value-of></I_USER_JOIN_CNT>
+
+					<I_BOARD_CNT><xsl:value-of select="I_BOARD_CNT"></xsl:value-of></I_BOARD_CNT>
+
+					<I_BOARD_CNL_CNT><xsl:value-of select="I_BOARD_CNL_CNT"></xsl:value-of></I_BOARD_CNL_CNT>
+
+					<I_FAIL_CNT><xsl:value-of select="I_FAIL_CNT"></xsl:value-of></I_FAIL_CNT>
+
+					<I_TOT_BOARD_PSN_CNT><xsl:value-of select="I_TOT_BOARD_PSN_CNT"></xsl:value-of></I_TOT_BOARD_PSN_CNT>
+
+					<I_RUN_TIME><xsl:value-of select="I_RUN_TIME"></xsl:value-of></I_RUN_TIME>
+
+					<I_RUN_DIST><xsl:value-of select="I_RUN_DIST"></xsl:value-of></I_RUN_DIST>
+
+					<I_SUM_USER_JOIN_CNT><xsl:value-of select="I_SUM_USER_JOIN_CNT"></xsl:value-of></I_SUM_USER_JOIN_CNT>
+
+					<I_SUM_BOARD_CNT><xsl:value-of select="I_SUM_BOARD_CNT"></xsl:value-of></I_SUM_BOARD_CNT>
+
+					<I_SUM_BOARD_CNL_CNT><xsl:value-of select="I_SUM_BOARD_CNL_CNT"></xsl:value-of></I_SUM_BOARD_CNL_CNT>
+
+					<I_SUM_FAIL_CNT><xsl:value-of select="I_SUM_FAIL_CNT"></xsl:value-of></I_SUM_FAIL_CNT>
+
+					<I_SUM_TOT_BOARD_PSN_CNT><xsl:value-of select="I_SUM_TOT_BOARD_PSN_CNT"></xsl:value-of></I_SUM_TOT_BOARD_PSN_CNT>
+
+					<I_SUM_RUN_TIME><xsl:value-of select="I_SUM_RUN_TIME"></xsl:value-of></I_SUM_RUN_TIME>
+
+					<I_SUM_RUN_DIST><xsl:value-of select="I_SUM_RUN_DIST"></xsl:value-of></I_SUM_RUN_DIST>
+
+					<D_SEND_DT><xsl:value-of select="D_SEND_DT"></xsl:value-of></D_SEND_DT>
+
+				</GROUP>
+
+			</xsl:for-each>
+
+	</xsl:template>				
+
+</xsl:stylesheet>
+
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+    <xsl:output method="xml" indent="no" ></xsl:output>
+
+	<xsl:param name="ifResult" ></xsl:param>
+
+    <xsl:template match="/">
+
+		<payload>
+
+		<xsl:for-each select="payload/results">
+
+			<results>
+
+				<S_TARGET_DT><xsl:value-of select="S_TARGET_DT"></xsl:value-of></S_TARGET_DT>
+
+				<S_SRVC_AREA_CD><xsl:value-of select="S_SRVC_AREA_CD"></xsl:value-of></S_SRVC_AREA_CD>
+
+				<S_IF_SEND_YN><xsl:value-of select="$ifResult"></xsl:value-of></S_IF_SEND_YN>
+
+			</results>
+
+		</xsl:for-each>
+
+		</payload>
+
+    </xsl:template>
+
+</xsl:stylesheet>
