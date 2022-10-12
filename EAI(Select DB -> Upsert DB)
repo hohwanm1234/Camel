@@ -1,0 +1,119 @@
+<routes xmlns="http://camel.apache.org/schema/spring">
+	<route id="test_text_db_v001">
+		<from uri="direct:test_text_db_v001"/>
+		<doTry>
+			<setBody><simple>${property.ORIGINAL_REQUEST_MSG}</simple></setBody>
+			<bean ref="Converter" method="UUID"/>
+
+			<!-- 모니터링 header Setting -->
+			<setProperty propertyName="ifId"><simple>test_text_db</simple></setProperty>
+			<setProperty propertyName="ifVer"><simple>v001</simple></setProperty>
+			<setProperty propertyName="ifSenderGrp"><simple>KR</simple></setProperty>
+			<setProperty propertyName="ifSender"><simple>Local</simple></setProperty>
+			<setProperty propertyName="ifReceiverGrp"><simple>KR</simple></setProperty>
+			<setProperty propertyName="ifReceiver"><simple>SN_DEV</simple></setProperty>
+			<setProperty propertyName="ifTrackingId"><simple>${property.UUID}-${date:now:yyyyMMddHHmmss}</simple></setProperty>
+			<setProperty propertyName="ifDateTime"><simple>${date:now:yyyyMMddHHmmss}</simple></setProperty>
+			<to uri="mybatis2:Test_Local_DB_Select_Count?statementType=SelectOne&amp;SqlSessionFactory=bean_jdbc_mysql_dihdb_session"/>
+			<setProperty propertyName="selectCount"><simple>${body}</simple></setProperty>
+			
+			<choice>
+				<when>
+					<simple>${property.selectCount} > 0 </simple>
+					<!-- 데이터 조회(Select) -->
+					<to uri="mybatis2:Test_Local_DB_Select?statementType=SelectList&amp;SqlSessionFactory=bean_jdbc_mysql_dihdb_session"/>
+					<setProperty propertyName="RootTag"><simple>payload</simple></setProperty> 
+					<setProperty propertyName="ListTag"><simple>results</simple></setProperty> 
+					<log message="########## Select Finish ##########"/>
+
+					<!-- List 형태 Data -> XML 형태 Data Convert -->
+					<bean ref="Converter" method="ListToXml"/>
+					<convertBodyTo type="java.lang.String"/>
+					<setProperty propertyName="xmlReturn"><simple>${body}</simple></setProperty> 
+
+					<!-- Mapping 및 Log 처리 -->
+					<to uri="xslt:file:service/xslt/test_text_local_jdbc_xslt_req?contentCache=false"/>
+					<log message="################ xslt Finish ################"></log>
+					<to uri="AuditLog?log=false&amp;command=logging&amp;logtype=request"/>
+
+					<!-- MQ 전송 -->
+					<to uri="activemq2:queue:test_text_db_REQ?connectionFactory=EAI-SERVER-BROKER_jmsConfiguration&amp;receiveTimeout=1000"/>
+					<to uri="AuditLog?log=false&amp;command=finish"/>
+			        </when>
+				<otherwise>  
+					<log message="################ No Data Found ################"></log>
+			        </otherwise>
+			</choice>
+			<doCatch>
+				<exception>java.lang.Exception</exception>
+				<handled><constant>false</constant></handled>	
+   				<!-- Error Property 처리 -->
+				<setProperty propertyName="ifResult"><simple>E</simple></setProperty>
+				<setProperty propertyName="ifFailMsg"><simple>${exception.message}</simple></setProperty>
+				<setProperty propertyName="ifError"><simple>${exception.stacktrace}</simple></setProperty>
+				<log message="ERROR REQ ---- ${property.ifError}"></log>
+				<transform><simple>${property.xmlReturn}</simple></transform>
+
+				<!-- Mapping 및 Log 처리 -->
+				<to uri="xslt:file:service/xslt/test_text_local_jdbc_xslt_error?contentCache=false"/>
+				<setProperty propertyName="RootTag"><simple>payload</simple></setProperty>
+				<setProperty propertyName="ListTag"><simple>results</simple></setProperty>
+
+				<!-- XML 형태 Data -> List 형태 Data Convert -->
+				<bean ref="Converter" method="XmlToList"/>
+				<to uri="AuditLog?log=false&amp;command=logging&amp;logtype=response"/>
+				<to uri="AuditLog?log=false&amp;command=finish"/>
+
+			</doCatch>
+			<doFinally>
+				<to uri="AuditLog?log=false&amp;command=finish&amp;logtype=request"/>
+			</doFinally>
+		</doTry>
+	</route>
+	<route id="test_text_db_v001-1">
+		<!-- MQ 수신 -->
+		<from uri="activemq2:queue:test_text_db_REQ?concurrentConsumers=1&amp;connectionFactory=EAI-SERVER-BROKER&amp;maxConcurrentConsumers=10&amp;receiveTimeout=1000"/>
+		<log message="################ Data Recieve ################"></log>
+		<doTry>
+			<setProperty propertyName="ifId"><xpath resultType="java.lang.String">//response/header/ifId/text()</xpath></setProperty>
+			<setProperty propertyName="ifVer"><xpath resultType="java.lang.String">//response/header/ifVer/text()</xpath></setProperty>
+			<setProperty propertyName="ifSenderGrp"><xpath resultType="java.lang.String">//response/header/ifSenderGrp/text()</xpath></setProperty>
+			<setProperty propertyName="ifSender"><xpath resultType="java.lang.String">//response/header/ifSender/text()</xpath></setProperty>
+			<setProperty propertyName="ifReceiverGrp"><xpath resultType="java.lang.String">//response/header/ifReceiverGrp/text()</xpath></setProperty>
+			<setProperty propertyName="ifReceiver"><xpath resultType="java.lang.String">//response/header/ifReceiver/text()</xpath></setProperty>
+			<setProperty propertyName="ifTrackingId"><xpath resultType="java.lang.String">//response/header/ifTrackingId/text()</xpath></setProperty>
+			<setProperty propertyName="ifDateTime"><xpath resultType="java.lang.String">//response/header/ifDateTime/text()</xpath></setProperty>
+			<setProperty propertyName="ifResult"><simple>S</simple></setProperty>
+			<setProperty propertyName="ifFailMsg"><simple>SUCCESS</simple></setProperty>			
+			<to uri="AuditLog?log=false&amp;command=logging&amp;logtype=request"/>
+			
+			<!-- XML 형태 Data -> List 형태 Data Convert -->
+			<convertBodyTo type="java.lang.String"/>				
+			<setProperty propertyName="RootTag"><simple>payload</simple></setProperty>
+			<setProperty propertyName="ListTag"><simple>results</simple></setProperty>
+			<bean ref="Converter" method="XmlToList"/>
+
+			<!-- 데이터 삽입(Upsert) -->
+			<to uri="mybatis2:Test_Local_DB_Upsert?statementType=InsertList&amp;SqlSessionFactory=bean_jdbc_mysql_dihdb_session"/>
+			<log message="########## Upsert Finish ##########"/>
+			<to uri="AuditLog?log=false&amp;command=logging&amp;logtype=response"/>	
+			<!-- <to uri="direct:test_text_db_v001"/> -->
+
+			<doCatch>
+				<exception>java.lang.Exception</exception>
+				<handled><constant>false</constant></handled>	
+   				<!-- Error Property 처리 -->
+				<setProperty propertyName="ifResult"><simple>E</simple></setProperty>
+				<setProperty propertyName="ifFailMsg"><simple>${exception.message}</simple></setProperty>
+				<setProperty propertyName="ifError"><simple>${exception.stacktrace}</simple></setProperty>
+			</doCatch>
+			<doFinally>
+				<to uri="AuditLog?log=false&amp;command=finish&amp;logtype=response"/>
+			</doFinally>
+		</doTry>
+
+		<to uri="xconnect-log:request?command=start&amp;bodyLogging=true"/>
+		<to uri="xconnect-log:response?command=logging&amp;bodyLogging=true"/>
+		<to uri="xconnect-log:any?command=flush&amp;bodyLogging=true"/>
+	</route>
+</routes>
