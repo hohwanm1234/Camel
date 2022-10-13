@@ -9,10 +9,10 @@
 			<setProperty propertyName="ifId"><simple>test_text_db</simple></setProperty>
 			<setProperty propertyName="ifVer"><simple>v001</simple></setProperty>
 			<setProperty propertyName="ifSenderGrp"><simple>KR</simple></setProperty>
-			<setProperty propertyName="ifSender"><simple>Local</simple></setProperty>
+			<setProperty propertyName="ifSender"><simple>DIH_DEV</simple></setProperty>
 			<setProperty propertyName="ifReceiverGrp"><simple>KR</simple></setProperty>
-			<setProperty propertyName="ifReceiver"><simple>SN_DEV</simple></setProperty>
-			<setProperty propertyName="ifTrackingId"><simple>${property.UUID}-${date:now:yyyyMMddHHmmss}</simple></setProperty>
+			<setProperty propertyName="ifReceiver"><simple>DIH_DEV</simple></setProperty>
+			<setProperty propertyName="ifTrackingId"><simple>${property.UUID}</simple></setProperty>
 			<setProperty propertyName="ifDateTime"><simple>${date:now:yyyyMMddHHmmss}</simple></setProperty>
 			<to uri="mybatis2:Test_Local_DB_Select_Count?statementType=SelectOne&amp;SqlSessionFactory=bean_jdbc_mysql_dihdb_session"/>
 			<setProperty propertyName="selectCount"><simple>${body}</simple></setProperty>
@@ -33,12 +33,14 @@
 
 					<!-- Mapping 및 Log 처리 -->
 					<to uri="xslt:file:service/xslt/test_text_local_jdbc_xslt_req?contentCache=false"/>
-					<log message="################ xslt Finish ################"></log>
+					<log message="################ Request xslt Finish ################"></log>
 					<to uri="AuditLog?log=false&amp;command=logging&amp;logtype=request"/>
 
-					<!-- MQ 전송 -->
-					<to uri="activemq2:queue:test_text_db_REQ?connectionFactory=EAI-SERVER-BROKER_jmsConfiguration&amp;receiveTimeout=1000"/>
-					<to uri="AuditLog?log=false&amp;command=finish"/>
+					<to uri="direct:test_text_db_Upsert"/>
+			
+					<!-- MQ 전송 (timeout 이슈로 인한 주석처리)-->
+					<!-- <to uri="activemq2:queue:test_text_db_REQ?connectionFactory=EAI-SERVER-BROKER_jmsConfiguration&amp;receiveTimeout=20000"/> -->
+					<!-- <to uri="AuditLog?log=false&amp;command=finish"/> -->
 			        </when>
 				<otherwise>  
 					<log message="################ No Data Found ################"></log>
@@ -71,22 +73,22 @@
 		</doTry>
 	</route>
 	<route id="test_text_db_v001-1">
+		<from uri="direct:test_text_db_Upsert"/>
 		<!-- MQ 수신 -->
-		<from uri="activemq2:queue:test_text_db_REQ?concurrentConsumers=1&amp;connectionFactory=EAI-SERVER-BROKER&amp;maxConcurrentConsumers=10&amp;receiveTimeout=1000"/>
+		<!-- <from uri="activemq2:queue:test_text_db_REQ?concurrentConsumers=1&amp;connectionFactory=EAI-SERVER-BROKER&amp;maxConcurrentConsumers=10&amp;receiveTimeout=20000"/> -->
 		<log message="################ Data Recieve ################"></log>
 		<doTry>
-			<setProperty propertyName="ifId"><xpath resultType="java.lang.String">//response/header/ifId/text()</xpath></setProperty>
-			<setProperty propertyName="ifVer"><xpath resultType="java.lang.String">//response/header/ifVer/text()</xpath></setProperty>
-			<setProperty propertyName="ifSenderGrp"><xpath resultType="java.lang.String">//response/header/ifSenderGrp/text()</xpath></setProperty>
-			<setProperty propertyName="ifSender"><xpath resultType="java.lang.String">//response/header/ifSender/text()</xpath></setProperty>
-			<setProperty propertyName="ifReceiverGrp"><xpath resultType="java.lang.String">//response/header/ifReceiverGrp/text()</xpath></setProperty>
-			<setProperty propertyName="ifReceiver"><xpath resultType="java.lang.String">//response/header/ifReceiver/text()</xpath></setProperty>
-			<setProperty propertyName="ifTrackingId"><xpath resultType="java.lang.String">//response/header/ifTrackingId/text()</xpath></setProperty>
-			<setProperty propertyName="ifDateTime"><xpath resultType="java.lang.String">//response/header/ifDateTime/text()</xpath></setProperty>
+			<setProperty propertyName="ifId"><simple>${property.ifId}</simple></setProperty>
+			<setProperty propertyName="ifVer"><simple>${property.ifVer}</simple></setProperty>
+			<setProperty propertyName="ifSenderGrp"><simple>${property.ifSenderGrp}</simple></setProperty>
+			<setProperty propertyName="ifSender"><simple>${property.ifSender}</simple></setProperty>
+			<setProperty propertyName="ifReceiverGrp"><simple>${property.ifReceiverGrp}</simple></setProperty>
+			<setProperty propertyName="ifReceiver"><simple>${property.ifReceiver}</simple></setProperty>
+			<setProperty propertyName="ifTrackingId"><simple>${property.ifTrackingId}</simple></setProperty>
+			<setProperty propertyName="ifDateTime"><simple>${property.ifDateTime}</simple></setProperty>
 			<setProperty propertyName="ifResult"><simple>S</simple></setProperty>
-			<setProperty propertyName="ifFailMsg"><simple>SUCCESS</simple></setProperty>			
-			<to uri="AuditLog?log=false&amp;command=logging&amp;logtype=request"/>
-			
+			<setProperty propertyName="ifFailMsg"><simple>SUCCESS</simple></setProperty>
+
 			<!-- XML 형태 Data -> List 형태 Data Convert -->
 			<convertBodyTo type="java.lang.String"/>				
 			<setProperty propertyName="RootTag"><simple>payload</simple></setProperty>
@@ -96,8 +98,12 @@
 			<!-- 데이터 삽입(Upsert) -->
 			<to uri="mybatis2:Test_Local_DB_Upsert?statementType=InsertList&amp;SqlSessionFactory=bean_jdbc_mysql_dihdb_session"/>
 			<log message="########## Upsert Finish ##########"/>
-			<to uri="AuditLog?log=false&amp;command=logging&amp;logtype=response"/>	
-			<!-- <to uri="direct:test_text_db_v001"/> -->
+
+			<!-- Mapping 및 Log 처리 -->
+			<to uri="xslt:file:service/xslt/test_text_local_jdbc_xslt_res?contentCache=false"/>
+			<log message="################ Response xslt Finish ################"></log>
+			<to uri="AuditLog?log=false&amp;command=logging&amp;logtype=response"/>
+			<to uri="AuditLog?log=false&amp;command=finish&amp;logtype=response"/>
 
 			<doCatch>
 				<exception>java.lang.Exception</exception>
@@ -108,6 +114,7 @@
 				<setProperty propertyName="ifError"><simple>${exception.stacktrace}</simple></setProperty>
 			</doCatch>
 			<doFinally>
+				<log message="${body}"></log>
 				<to uri="AuditLog?log=false&amp;command=finish&amp;logtype=response"/>
 			</doFinally>
 		</doTry>
