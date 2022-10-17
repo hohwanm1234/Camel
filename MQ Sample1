@@ -1,0 +1,220 @@
+<routes xmlns="http://camel.apache.org/schema/spring">
+	<route id="test_text_v001">
+		<!-- <from uri="activemq2:queue:IF_ISC_UMOD_IMS_0001_CON?concurrentConsumers=1&amp;connectionFactory=BROKER&amp;maxConcurrentConsumers=10&amp;receiveTimeout=1000"/> -->
+		<from uri="direct:IF_ISC_UMOD_IMS_0001_v001"/>
+		<transacted ref="PROPAGATION_REQUIRED_MOD_TIBERO_DB"/>
+		<doTry>
+			<bean ref="Converter" method="UUID"/>
+			<!-- set properties for monitoring -->
+			<setProperty propertyName="ifId"><simple>IF_ISC_UMOD_IMS_0001</simple></setProperty>
+			<setProperty propertyName="ifVer"><simple>v001</simple></setProperty>
+			<setProperty propertyName="ifSenderGrp"><simple>ISC</simple></setProperty>
+			<setProperty propertyName="ifSender"><simple>UMOD</simple></setProperty>
+			<setProperty propertyName="ifReceiverGrp"><simple>ISC</simple></setProperty>
+			<setProperty propertyName="ifReceiver"><simple>IMS</simple></setProperty>
+			<setProperty propertyName="ifTrackingId"><simple>MODDB-${property.UUID}</simple></setProperty>
+			<setProperty propertyName="ifDateTime"><simple>${date:now:yyyyMMddHHmmss}</simple>
+			</setProperty>
+			<!-- 데이터 조회 -->
+			<to uri="mybatis2:selectCountP_IF_IMS_USER_JOIN_INFO?statementType=SelectOne&amp;SqlSessionFactory=MOD_TIBERO_DB_session"/>
+			<setProperty propertyName="selectCount">
+				<simple>${body}</simple>
+			</setProperty>
+			<choice>
+				<when>
+					<simple>${property.selectCount} > 0 </simple>
+						<to uri="mybatis2:selectListP_IF_IMS_USER_JOIN_INFO?statementType=SelectList&amp;SqlSessionFactory=MOD_TIBERO_DB_session"/>
+						<setProperty propertyName="RootTag"><simple>payload</simple></setProperty>
+						<setProperty propertyName="ListTag"><simple>results</simple></setProperty>
+						<bean ref="Converter" method="ListToXml"/>
+						<!-- payload/results 형태의 xml -->
+						<convertBodyTo type="java.lang.String"/>
+						<setProperty propertyName="xmlReturn"><simple>${body}</simple> </setProperty>
+						<to uri="xslt:file:service/xslt/IF_ISC_UMOD_IMS_0001_REQ?contentCache=false"/>
+						<!-- xconnector 표준 xml mapping -->
+						<to uri="AuditLog?log=false&amp;command=logging&amp;logtype=request"/>
+						<!-- xconnector 표준 xml AuditLog -->
+						<to uri="activemq2:queue:IF_ISC_UMOD_IMS_0001_REQ?connectionFactory=BROKER_jmsConfiguration"/>
+						<to uri="AuditLog?log=false&amp;command=finish"/>
+				</when>
+				<otherwise>
+					<log message="########## No results were found ##########"/>
+				</otherwise>
+			</choice>
+			<doCatch>
+				<exception>java.lang.Exception</exception>
+				<handled><constant>false</constant></handled>
+				<setProperty propertyName="ifResult"><simple>E</simple></setProperty>
+				<setProperty propertyName="ifFailMsg"><simple>${exception.message}</simple></setProperty>
+				<setProperty propertyName="ifError"><simple>${exception.stacktrace}</simple></setProperty>
+				<log message="ERROR REQ ---- ${property.ifError}"/>
+				<transform>
+					<simple>${property.xmlReturn}</simple>
+				</transform>
+				<!-- payload/results 형태의 xml -->
+				<to uri="xslt:file:service/xslt/IF_ISC_UMOD_IMS_0001_CON?contentCache=false"/>
+				<setProperty propertyName="RootTag">
+					<simple>payload</simple>
+				</setProperty>
+				<setProperty propertyName="ListTag">
+					<simple>results</simple>
+				</setProperty>
+				<bean ref="Converter" method="XmlToList"/>
+				<to uri="AuditLog?log=false&amp;command=logging&amp;logtype=response"/>
+				<to uri="mybatis2:updateP_IF_IMS_USER_JOIN_INFO?statementType=UpdateList&amp;SqlSessionFactory=MOD_TIBERO_DB_session"/>
+				<!-- E 로 업데이트 -->
+				<to uri="AuditLog?log=false&amp;command=finish"/>
+			</doCatch>
+			<doFinally></doFinally>
+		</doTry>
+	</route>
+	<route>
+		<from uri="activemq2:queue:IF_ISC_UMOD_IMS_0001_REQ?concurrentConsumers=1&amp;connectionFactory=BROKER&amp;maxConcurrentConsumers=10&amp;receiveTimeout=1000"/>
+		<doTry>
+			<!-- set properties for monitoring -->
+			<setProperty propertyName="ifId"><xpath resultType="java.lang.String">//request/header/ifId/text()</xpath></setProperty>
+			<setProperty propertyName="ifVer"><xpath resultType="java.lang.String">//request/header/ifVer/text()</xpath></setProperty>
+			<setProperty propertyName="ifSenderGrp"><xpath resultType="java.lang.String">//request/header/ifSenderGrp/text()</xpath></setProperty>
+			<setProperty propertyName="ifSender"><xpath resultType="java.lang.String">//request/header/ifSender/text()</xpath></setProperty>
+			<setProperty propertyName="ifReceiverGrp"><xpath resultType="java.lang.String">//request/header/ifReceiverGrp/text()</xpath></setProperty>
+			<setProperty propertyName="ifReceiver"><xpath resultType="java.lang.String">//request/header/ifReceiver/text()</xpath></setProperty>
+			<setProperty propertyName="ifTrackingId"><xpath resultType="java.lang.String">//request/header/ifTrackingId/text()</xpath></setProperty>
+			<setProperty propertyName="ifDateTime"><xpath resultType="java.lang.String">//request/header/ifDateTime/text()</xpath></setProperty>
+			<setProperty propertyName="originalData"><simple>${body}</simple></setProperty>
+			<!-- xconnector 표준 xml request-->
+			<to uri="xslt:file:service/xslt/IF_ISC_UMOD_IMS_0001_MAP?contentCache=false"/>
+			<setProperty propertyName="elementA">
+				<simple>GROUP</simple>
+			</setProperty>
+			<bean ref="Converter" method="XmlToJson(*)"/>
+			<convertBodyTo type="java.lang.String"/>
+			<to uri="AuditLog?log=false&amp;command=logging&amp;logtype=request"/>
+			<!-- custom json request AuditLog-->
+			<setBody>
+				<simple>${body}</simple>
+			</setBody>
+			<setHeader headerName="Http-Method">
+				<constant>post</constant>
+			</setHeader>
+			<setHeader headerName="Content-Type">
+				<constant>application/json; charset=utf-8</constant>
+			</setHeader>
+			<setHeader headerName="SMCITYAUTH">
+				<constant>@@SMCITYAUTH</constant>
+			</setHeader>
+			<to uri="http4://@@IMS_URL/autoever/ApiDailyUser.jsp?bridgeEndpoint=true"/>
+			<!-- <to uri="https4://@@IMS_URL/autoever/ApiDailyUser.jsp?sslContextParameters=#SSL&amp;bridgeEndpoint=true&amp;throwExceptionOnFailure=false"/> -->
+			<convertBodyTo type="java.lang.String"/>
+			<setProperty propertyName="ifResult">
+				<jsonpath resultType="java.lang.String">$.RESULT</jsonpath>
+			</setProperty>
+			<setProperty propertyName="ifFailMsg">
+				<jsonpath resultType="java.lang.String">$.INFO</jsonpath>
+			</setProperty>
+			<to uri="AuditLog?log=false&amp;command=logging&amp;logtype=response"/>
+			<!-- custom json response AuditLog-->
+			<transform>
+				<simple>${property.originalData}</simple>
+			</transform>
+			<!-- xconnector 표준 xml request -->
+			<to uri="xslt:file:service/xslt/IF_ISC_UMOD_IMS_0001_RES?contentCache=false"/>
+			<!-- xconnector 표준 xml response mapping-->
+			<to uri="activemq2:queue:IF_ISC_UMOD_IMS_0001_RES?connectionFactory=BROKER_jmsConfiguration"/>
+			<!-- xconnector 표준 xml MQ 전송 -->
+			<doCatch>
+				<exception>java.lang.Exception</exception>
+				<setProperty propertyName="ifResult">
+					<simple>E</simple>
+				</setProperty>
+				<setProperty propertyName="ifFailMsg">
+					<simple>${exception.message}</simple>
+				</setProperty>
+				<setProperty propertyName="ifError">
+					<simple>${exception.stacktrace}</simple>
+				</setProperty>
+				<log message="ERROR RES---- ${property.ifError}"/>
+				<transform>
+					<simple>${property.originalData}</simple>
+				</transform>
+				<!-- xconnector 표준 xml request-->
+				<to uri="xslt:file:service/xslt/IF_ISC_UMOD_IMS_0001_RES?contentCache=false"/>
+				<!-- xconnector 표준 xml response error mapping-->
+				<to uri="AuditLog?log=false&amp;command=logging&amp;logtype=response"/>
+				<to uri="activemq2:queue:IF_ISC_UMOD_IMS_0001_RES?connectionFactory=BROKER_jmsConfiguration"/>
+				<!-- xconnector 표준 xml MQ 전송 -->
+			</doCatch>
+			<doFinally>
+				<to uri="AuditLog?log=false&amp;command=finish"/>
+			</doFinally>
+		</doTry>
+	</route>
+	<route>
+		<from uri="activemq2:queue:IF_ISC_UMOD_IMS_0001_RES?concurrentConsumers=1&amp;connectionFactory=BROKER&amp;maxConcurrentConsumers=10&amp;receiveTimeout=1000"/>
+		<transacted ref="PROPAGATION_REQUIRED_MOD_TIBERO_DB"/>
+		<doTry>
+			<!-- set properties for monitoring -->
+			<setProperty propertyName="ifId">
+				<xpath resultType="java.lang.String">//response/header/ifId/text()</xpath>
+			</setProperty>
+			<setProperty propertyName="ifVer">
+				<xpath resultType="java.lang.String">//response/header/ifVer/text()</xpath>
+			</setProperty>
+			<setProperty propertyName="ifSenderGrp">
+				<xpath resultType="java.lang.String">//response/header/ifSenderGrp/text()</xpath>
+			</setProperty>
+			<setProperty propertyName="ifSender">
+				<xpath resultType="java.lang.String">//response/header/ifSender/text()</xpath>
+			</setProperty>
+			<setProperty propertyName="ifReceiverGrp">
+				<xpath resultType="java.lang.String">//response/header/ifReceiverGrp/text()</xpath>
+			</setProperty>
+			<setProperty propertyName="ifReceiver">
+				<xpath resultType="java.lang.String">//response/header/ifReceiver/text()</xpath>
+			</setProperty>
+			<setProperty propertyName="ifTrackingId">
+				<xpath resultType="java.lang.String">//response/header/ifTrackingId/text()</xpath>
+			</setProperty>
+			<setProperty propertyName="ifDateTime">
+				<xpath resultType="java.lang.String">//response/header/ifDateTime/text()</xpath>
+			</setProperty>
+			<setProperty propertyName="ifResult">
+				<simple>S</simple>
+			</setProperty>
+			<setProperty propertyName="ifFailMsg">
+				<simple>SUCCESS</simple>
+			</setProperty>
+			<to uri="AuditLog?log=false&amp;command=logging&amp;logtype=request"/>
+			<convertBodyTo type="java.lang.String"/>
+			<setProperty propertyName="RootTag">
+				<simple>payload</simple>
+			</setProperty>
+			<setProperty propertyName="ListTag">
+				<simple>results</simple>
+			</setProperty>
+			<bean ref="Converter" method="XmlToList"/>
+			<!-- payload/results 형태의 list -->
+			<to uri="mybatis2:updateP_IF_IMS_USER_JOIN_INFO?statementType=UpdateList&amp;SqlSessionFactory=MOD_TIBERO_DB_session"/>
+			<to uri="AuditLog?log=false&amp;command=logging&amp;logtype=response"/>
+			<!-- <to uri="activemq2:queue:IF_ISC_UMOD_IMS_0001_CON?connectionFactory=BROKER_jmsConfiguration"/> -->
+			<to uri="direct:IF_ISC_UMOD_IMS_0001_v001"/>
+			<doCatch>
+				<exception>java.lang.Exception</exception>
+				<handled>
+					<constant>false</constant>
+				</handled>
+				<setProperty propertyName="ifResult">
+					<simple>E</simple>
+				</setProperty>
+				<setProperty propertyName="ifFailMsg">
+					<simple>${exception.message}</simple>
+				</setProperty>
+				<setProperty propertyName="ifError">
+					<simple>${exception.stacktrace}</simple>
+				</setProperty>
+			</doCatch>
+			<doFinally>
+				<to uri="AuditLog?log=false&amp;command=finish"/>
+			</doFinally>
+		</doTry>
+	</route>
+</routes>
