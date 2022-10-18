@@ -1,0 +1,54 @@
+<routes xmlns="http://camel.apache.org/schema/spring">
+	<route id="IF_SG_TEST_FBNK_0001_v001">
+		<from uri="sftp://10.7.140.238/temp/ERP/Outbox/pre?delete=false&amp;move=../done&amp;antInclude=UFF2.FORMAT362.HYUNMOT3.HYUMOT3*&amp;scheduler=quartz2&amp;scheduler.cron=13+49+14+*+*+?&amp;binary=false&amp;password=Qazmlp1!&amp;username=xconadm"/>
+
+		<doTry>
+			<log message="CamelBatchSize:${property.CamelBatchSize}" loggingLevel="DEBUG"/>
+			<log message="CamelBatchIndex:${property.CamelBatchIndex}" loggingLevel="DEBUG"/>
+			<log message="CamelBatchComplete:${property.CamelBatchComplete}" loggingLevel="DEBUG"/>
+
+			<setProperty propertyName="requestbody"><simple>${body}</simple></setProperty>
+			<bean ref="Converter" method="UUID"/>
+
+			<setProperty propertyName="corelationKey"><simple>${property.UUID}</simple></setProperty>
+			<setProperty propertyName="routeId"><simple>IF_SG_TEST_FBNK_0001_v001</simple></setProperty>
+
+			<setProperty propertyName="ifId"><simple>IF_SG_TEST_FBNK_0001</simple></setProperty>
+			<setProperty propertyName="ifVer"><simple>v001</simple></setProperty>
+			<setProperty propertyName="ifSenderGrp"><simple>SG</simple></setProperty>	
+			<setProperty propertyName="ifSender"><simple>TEST</simple></setProperty>	
+			<setProperty propertyName="ifReceiverGrp"><simple>SG</simple></setProperty>	
+			<setProperty propertyName="ifReceiver"><simple>FBNK</simple></setProperty>			
+			<setProperty propertyName="ifTrackingId"><simple>${property.UUID}</simple></setProperty>
+			<setProperty propertyName="ifDatetime"><simple>${date-with-timezone:now:GMT-0:yyyyMMddHHmmss}</simple></setProperty>
+ 			<setProperty propertyName="I_Index"><simple>${property.CamelBatchIndex}++</simple></setProperty>
+
+			<setProperty propertyName="R_Response">
+			<simple>
+               				[${property.I_Index}/${property.CamelBatchSize}] fileName:${in.header.CamelFilePath};fileSize:"${in.header.CamelFileLength} 
+			</simple>
+			</setProperty>
+
+
+			<setBody><simple>${property.R_Response}</simple></setBody>
+               		<to uri="AuditLog?log=true&amp;command=logging&amp;logtype=request"/>
+
+			<setBody><simple>${property.requestbody}</simple></setBody>
+			<to uri="sftp://10.7.140.238/temp/DBS/Outbox?binary=false&amp;fileExist=Override&amp;password=Qazmlp1!&amp;username=xconadm"/>
+
+
+			<doCatch>
+				<exception>java.lang.Exception</exception>
+				<setProperty propertyName="status"><simple>E</simple></setProperty>
+				<from uri="sftp:[{host}]:[{port}]/[{directoryName}]"/>
+				<setProperty propertyName="ifFailMsg"><simple>${exception.message}</simple></setProperty>
+				<setProperty propertyName="error"><simple>${exception.stacktrace}</simple></setProperty>
+
+			</doCatch>
+			<doFinally>
+				<to uri="AuditLog?log=true&amp;command=logging&amp;logtype=response"/>
+				<to uri="AuditLog?log=false&amp;command=finish"/>
+			</doFinally>
+		</doTry>
+	</route>
+</routes>
