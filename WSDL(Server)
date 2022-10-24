@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="http://10.7.140.238:7072/eai/IF_SG_HMMI_SAP_0001Service" targetNamespace="http://eai.xconnector.com/services/receive" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://eai.xconnector.com/services/receive" xmlns:hd="http://eai.xconnector.com/services/receive/headers" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/">
+	<wsdl:types>
+     <xsd:schema targetNamespace="http://eai.xconnector.com/services/receive/headers" elementFormDefault="unqualified">
+      <xsd:element name="ifId" type="xsd:string"></xsd:element>
+      <xsd:element name="ifVer" type="xsd:string"></xsd:element>
+      <xsd:element name="ifSenderGrp" type="xsd:string"></xsd:element>
+      <xsd:element name="ifSender" type="xsd:string"></xsd:element>
+      <xsd:element name="ifReceiverGrp" type="xsd:string"></xsd:element>
+      <xsd:element name="ifReceiver" type="xsd:string"></xsd:element>
+      <xsd:element name="ifTrackingId" type="xsd:string"></xsd:element>
+      <xsd:element name="ifDateTime" type="xsd:string"></xsd:element>
+      <xsd:element name="ifResult" type="xsd:string"></xsd:element>
+      <xsd:element name="ifFailMsg" type="xsd:string"></xsd:element>
+      <xsd:element name="ifMsgCnt" type="xsd:string"></xsd:element>
+    </xsd:schema>
+		<xsd:schema targetNamespace="http://eai.xconnector.com/services/receive" elementFormDefault="qualified" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<xsd:complexType name="header">
+	<xsd:sequence>
+	<xsd:element name="ifId" type="xsd:string"></xsd:element>
+	<xsd:element name="ifVer" type="xsd:string"></xsd:element>
+	<xsd:element name="ifSenderGrp" type="xsd:string"></xsd:element>
+	<xsd:element name="ifSender" type="xsd:string"></xsd:element>
+	<xsd:element name="ifReceiverGrp" type="xsd:string"></xsd:element>
+	<xsd:element name="ifReceiver" type="xsd:string"></xsd:element>
+	<xsd:element name="ifTrackingId" type="xsd:string"></xsd:element>
+	<xsd:element name="ifDateTime" type="xsd:string"></xsd:element>
+	<xsd:element name="ifResult" type="xsd:string"></xsd:element>
+	<xsd:element name="ifFailMsg" type="xsd:string"></xsd:element>
+	<xsd:element name="ifMsgCnt" type="xsd:string"></xsd:element>
+</xsd:sequence>
+</xsd:complexType><xsd:complexType name="reqitem">
+  <xsd:sequence>
+    <xsd:element name="item" nillable="true" type="tns:item" minOccurs="0"></xsd:element>
+  </xsd:sequence>
+</xsd:complexType>
+
+<xsd:complexType name="item">
+  <xsd:sequence>
+    <xsd:element name="TSTMP" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="SYSTEMCD" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="BSTNK" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="EBELN" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZFDONO" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZNCKDINV" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZNCNTR" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZNCASEN" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZCVIN" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="KDMAT" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZQMENGE2" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="KUNNR" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZMDEALE" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZDPROC" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZCSHIP" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZCFSCPP" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZCINTC" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZCEXTC" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZCBIP" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZQSHP" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="WAERS" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZAFOBPRC3" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZDSHP" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZNSEAL" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZNINV" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZCPCKBTCH" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="EBELP" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ZDARVP" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="EBELN_R" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="BRGEW" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="NTGEW" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="GEWEI" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="WERKS_V" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+  </xsd:sequence>
+</xsd:complexType>
+
+
+<xsd:complexType name="resitem">
+  <xsd:sequence>
+    <xsd:element name="ifResult" nillable="true" type="tns:ifResult" minOccurs="0"></xsd:element>
+  </xsd:sequence>
+</xsd:complexType>
+
+<xsd:complexType name="ifResult">
+  <xsd:sequence>
+    <xsd:element name="ifResultStatus" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+    <xsd:element name="ifResultMsg" nillable="true" type="xsd:string" minOccurs="0"></xsd:element>
+  </xsd:sequence>
+</xsd:complexType>
+
+<xsd:element name="reqitem" type="tns:reqitem"></xsd:element>
+<xsd:element name="resitem" type="tns:resitem"></xsd:element>
+
+		</xsd:schema>
+	</wsdl:types>
+
+	<wsdl:message name="http://10.7.140.238:7072/eai/IF_SG_HMMI_SAP_0001Service_Port_Type_reqitem">
+		<wsdl:part name="parameters" element="tns:reqitem" ></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="http://10.7.140.238:7072/eai/IF_SG_HMMI_SAP_0001Service_Port_Type_resitem">
+		<wsdl:part name="parameters" element="tns:resitem" ></wsdl:part>
+	</wsdl:message>
+
+	<wsdl:message name="xconHeader">
+		<wsdl:part name="ifId" element="hd:ifId"></wsdl:part>
+		<wsdl:part name="ifVer" element="hd:ifVer"></wsdl:part>
+		<wsdl:part name="ifSenderGrp" element="hd:ifSenderGrp"></wsdl:part>
+		<wsdl:part name="ifSender" element="hd:ifSender"></wsdl:part>
+		<wsdl:part name="ifReceiverGrp" element="hd:ifReceiverGrp"></wsdl:part>
+		<wsdl:part name="ifReceiver" element="hd:ifReceiver"></wsdl:part>
+		<wsdl:part name="ifDateTime" element="hd:ifDateTime"></wsdl:part>
+		<wsdl:part name="ifTrackingId" element="hd:ifTrackingId"></wsdl:part>
+	</wsdl:message>
+
+	<wsdl:portType name="http://10.7.140.238:7072/eai/IF_SG_HMMI_SAP_0001Service_Port_Type">
+		<wsdl:operation name="http://10.7.140.238:7072/eai/IF_SG_HMMI_SAP_0001Operation">
+			<wsdl:input message="tns:http://10.7.140.238:7072/eai/IF_SG_HMMI_SAP_0001Service_Port_Type_reqitem" ></wsdl:input>
+			<wsdl:output message="tns:http://10.7.140.238:7072/eai/IF_SG_HMMI_SAP_0001Service_Port_Type_resitem" ></wsdl:output>
+		</wsdl:operation>
+	</wsdl:portType>
+
+	<wsdl:binding name="http://10.7.140.238:7072/eai/IF_SG_HMMI_SAP_0001Service_Binder" type="tns:http://10.7.140.238:7072/eai/IF_SG_HMMI_SAP_0001Service_Port_Type">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"></soap:binding>
+		<wsdl:operation name="http://10.7.140.238:7072/eai/IF_SG_HMMI_SAP_0001Operation">
+			<soap:operation soapAction="http://10.7.140.238:7072/eai/IF_SG_HMMI_SAP_0001" style="document"></soap:operation>
+			<wsdl:input>
+				<soap:header message="tns:xconHeader" part="ifId" use="literal"></soap:header>
+				<soap:header message="tns:xconHeader" part="ifVer" use="literal"></soap:header>
+				<soap:header message="tns:xconHeader" part="ifSenderGrp" use="literal"></soap:header>
+				<soap:header message="tns:xconHeader" part="ifSender" use="literal"></soap:header>
+				<soap:header message="tns:xconHeader" part="ifReceiverGrp" use="literal"></soap:header>
+				<soap:header message="tns:xconHeader" part="ifReceiver" use="literal"></soap:header>
+				<soap:header message="tns:xconHeader" part="ifDateTime" use="literal"></soap:header>
+				<soap:header message="tns:xconHeader" part="ifTrackingId" use="literal"></soap:header>
+				<soap:body parts="parameters" use="literal"></soap:body>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:header message="tns:xconHeader" part="ifId" use="literal"></soap:header>
+				<soap:header message="tns:xconHeader" part="ifVer" use="literal"></soap:header>
+				<soap:header message="tns:xconHeader" part="ifSenderGrp" use="literal"></soap:header>
+				<soap:header message="tns:xconHeader" part="ifSender" use="literal"></soap:header>
+				<soap:header message="tns:xconHeader" part="ifReceiverGrp" use="literal"></soap:header>
+				<soap:header message="tns:xconHeader" part="ifReceiver" use="literal"></soap:header>
+				<soap:header message="tns:xconHeader" part="ifDateTime" use="literal"></soap:header>
+				<soap:header message="tns:xconHeader" part="ifTrackingId" use="literal"></soap:header>
+				<soap:body parts="parameters" use="literal"></soap:body>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+
+	<wsdl:service name="http://10.7.140.238:7072/eai/IF_SG_HMMI_SAP_0001Service">
+		<wsdl:port name="http://10.7.140.238:7072/eai/IF_SG_HMMI_SAP_0001Service_Port" binding="tns:http://10.7.140.238:7072/eai/IF_SG_HMMI_SAP_0001Service_Binder">
+			<soap:address location="http://10.7.140.238:7072/services/receive"></soap:address>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>
